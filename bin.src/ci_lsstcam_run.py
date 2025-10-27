@@ -7,7 +7,9 @@ from lsst.ci.builder.commands import (CreateButler, RegisterInstrument, WriteCur
                                       RegisterSkyMap, DefineVisits, ButlerImport,
                                       TestRunner)
 
-TESTDATA_DIR = "/sdf/group/rubin/shared/data/test_data/testdata_ci_lsstcam_m49"
+TESTDATA_DIR = os.getenv(
+    "LSSTCAM_TESTDATA_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_lsstcam_m49"
+)
 PRETRAINED_MODELS_DIR = "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
 INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qgraph"
