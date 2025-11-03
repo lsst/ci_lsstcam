@@ -10,7 +10,9 @@ from lsst.ci.builder.commands import (CreateButler, RegisterInstrument, WriteCur
 TESTDATA_DIR = os.getenv(
     "LSSTCAM_TESTDATA_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_lsstcam_m49"
 )
-PRETRAINED_MODELS_DIR = "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
+PRETRAINED_MODELS_DIR = os.getenv(
+    "TESTDATA_CI_IMSIM_TRAINING_MODEL", "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
+)
 INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qgraph"
 INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_comcam_2025-02-18,skymaps"
