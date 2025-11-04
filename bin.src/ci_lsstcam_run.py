@@ -11,7 +11,7 @@ TESTDATA_DIR = os.getenv(
     "LSSTCAM_TESTDATA_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_lsstcam_m49"
 )
 PRETRAINED_MODELS_DIR = os.getenv(
-    "TESTDATA_CI_IMSIM_TRAINING_MODEL", "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
+    "TESTDATA_CI_IMSIM_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
 )
 INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qgraph"
