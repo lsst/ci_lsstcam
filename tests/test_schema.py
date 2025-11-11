@@ -76,12 +76,6 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
         if tableName == "DiaObject":
             expectedColumns = {k: v for k, v in expectedColumns.items() if not k.startswith(('z_', 'y_'))}
 
-        # 4. forcedSourceId and forcedSourceOnDiaObjectId were removed in dp1
-        outputColumnNames = [c for c in outputColumnNames
-                             if c not in ('forcedSourceId', 'forcedSourceOnDiaObjectId')]
-
-
-
         self.assertEqual(
             set(outputColumnNames), set(expectedColumns.keys()), f"{info} failed"
         )
