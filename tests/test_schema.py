@@ -44,16 +44,19 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
 
         cls.schema = readSdmSchemaFile(SCHEMA_FILE)
 
-    def _validateSchema(self, dataset, dataId, tableName, useNewFormatCheck=False):
+    def _validateSchema(self, dataset, dataId, tableName, isDataFrame=False):
         """Check column name and data type match between dataset and DDL"""
         info = f"dataset={dataset} tableName={tableName} dataId={dataId}"
 
         expectedColumns = {column.name: column.datatype for column in self.schema[tableName].columns}
+        storageClass = "DataFrame" if isDataFrame else "ArrowAstropy"
 
-        df = self.butler.get(dataset, dataId, storageClass="DataFrame")
-        df.reset_index(inplace=True)
-
-        outputColumnNames = df.columns.to_list()
+        table = self.butler.get(dataset, dataId, storageClass=storageClass)
+        if isDataFrame:
+            table.reset_index(inplace=True)
+            outputColumnNames = table.columns.to_list()
+        else:
+            outputColumnNames = list(table.columns)
 
         # Edit expectedColumns and outputColumnNames per exceptions
 
@@ -71,10 +74,10 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
             set(outputColumnNames), set(expectedColumns.keys()), f"{info} failed"
         )
 
-        if useNewFormatCheck:
-            checkDataFrameAgainstSdmSchema(self.schema, df, tableName)
+        if isDataFrame:
+            checkDataFrameAgainstSdmSchema(self.schema, table, tableName)
         else:
-            # the data type mapping from felis datatype to pandas
+            # the data type mapping from felis datatype to astropy
             typeMapping = {
                 "boolean": "^bool$",
                 "short": "^int16$",
@@ -82,12 +85,12 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
                 "long": "^int64$",
                 "float": "^float32$",
                 "double": "^float64$",
-                "char": "^object$",
+                "char": "^str",
                 "timestamp": r"^datetime64\[[un]s\]$",
             }
             for column in outputColumnNames:
                 self.assertRegex(
-                    df.dtypes.get(column).name,
+                    table.dtype[column].name,
                     typeMapping[expectedColumns[column]],
                     f"{info} column={column} failed",
                 )
@@ -131,12 +134,12 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
     def testDiaObjectSchemaMatch(self):
         """Check dia_object"""
         dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
-        self._validateSchema("dia_object", dataId, "DiaObject", useNewFormatCheck=True)
+        self._validateSchema("dia_object", dataId, "DiaObject", isDataFrame=True)
 
     def testDiaSourceSchemaMatch(self):
         """Check one dia_source"""
         dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
-        self._validateSchema("dia_source", dataId, "DiaSource", useNewFormatCheck=True)
+        self._validateSchema("dia_source", dataId, "DiaSource", isDataFrame=True)
 
 
 if __name__ == "__main__":
