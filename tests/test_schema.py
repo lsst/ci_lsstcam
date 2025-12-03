@@ -67,11 +67,6 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
         # and are not expected in parquet files
         expectedColumns = {k: v for k, v in expectedColumns.items() if not k.endswith(("Mag", "MagErr"))}
 
-        # 3. Bands for non-existent data don't appear in DiaObject
-        # and there is no z or y-band data in testdata_ci_lsstcam_m49
-        if tableName == "DiaObject":
-            expectedColumns = {k: v for k, v in expectedColumns.items() if not k.startswith(('z_', 'y_'))}
-
         self.assertEqual(
             set(outputColumnNames), set(expectedColumns.keys()), f"{info} failed"
         )
