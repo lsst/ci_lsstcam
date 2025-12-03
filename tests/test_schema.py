@@ -21,11 +21,11 @@
 
 import os
 import unittest
-import yaml
 
 from lsst.daf.butler import Butler
 import lsst.utils.tests
 
+from lsst.pipe.tasks.schemaUtils import checkDataFrameAgainstSdmSchema, readSdmSchemaFile
 from lsst.utils import getPackageDir
 
 BUTLER_DIR = os.path.join(getPackageDir("ci_lsstcam"), "DATA")
@@ -41,18 +41,14 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
         super().setUpClass()
         cls.butler = Butler(BUTLER_DIR, writeable=False, collections=COLLECTION)
         cls.skymap = list(cls.butler.registry.queryDatasets(datasetType="object"))[0].dataId["skymap"]
-        with open(SCHEMA_FILE, "r") as f:
-            cls.schema = yaml.safe_load(f)["tables"]
 
-    def _validateSchema(self, dataset, dataId, tableName):
+        cls.schema = readSdmSchemaFile(SCHEMA_FILE)
+
+    def _validateSchema(self, dataset, dataId, tableName, useNewFormatCheck=False):
         """Check column name and data type match between dataset and DDL"""
         info = f"dataset={dataset} tableName={tableName} dataId={dataId}"
 
-        sdmSchema = [table for table in self.schema if table["name"] == tableName]
-        self.assertEqual(len(sdmSchema), 1)
-        expectedColumns = {
-            column["name"]: column["datatype"] for column in sdmSchema[0]["columns"]
-        }
+        expectedColumns = {column.name: column.datatype for column in self.schema[tableName].columns}
 
         df = self.butler.get(dataset, dataId, storageClass="DataFrame")
         df.reset_index(inplace=True)
@@ -80,23 +76,26 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
             set(outputColumnNames), set(expectedColumns.keys()), f"{info} failed"
         )
 
-        # the data type mapping from felis datatype to pandas
-        typeMapping = {
-            "boolean": "^bool$",
-            "short": "^int16$",
-            "int": "^int32$",
-            "long": "^int64$",
-            "float": "^float32$",
-            "double": "^float64$",
-            "char": "^object$",
-            "timestamp": r"^datetime64\[[un]s\]$",
-        }
-        for column in outputColumnNames:
-            self.assertRegex(
-                df.dtypes.get(column).name,
-                typeMapping[expectedColumns[column]],
-                f"{info} column={column} failed",
-            )
+        if useNewFormatCheck:
+            checkDataFrameAgainstSdmSchema(self.schema, df, tableName)
+        else:
+            # the data type mapping from felis datatype to pandas
+            typeMapping = {
+                "boolean": "^bool$",
+                "short": "^int16$",
+                "int": "^int32$",
+                "long": "^int64$",
+                "float": "^float32$",
+                "double": "^float64$",
+                "char": "^object$",
+                "timestamp": r"^datetime64\[[un]s\]$",
+            }
+            for column in outputColumnNames:
+                self.assertRegex(
+                    df.dtypes.get(column).name,
+                    typeMapping[expectedColumns[column]],
+                    f"{info} column={column} failed",
+                )
 
     def testObjectSchemaMatch(self):
         """Check object table"""
@@ -137,12 +136,12 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
     def testDiaObjectSchemaMatch(self):
         """Check dia_object"""
         dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
-        self._validateSchema("dia_object", dataId, "DiaObject")
+        self._validateSchema("dia_object", dataId, "DiaObject", useNewFormatCheck=True)
 
     def testDiaSourceSchemaMatch(self):
         """Check one dia_source"""
         dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
-        self._validateSchema("dia_source", dataId, "DiaSource")
+        self._validateSchema("dia_source", dataId, "DiaSource", useNewFormatCheck=True)
 
 
 if __name__ == "__main__":
