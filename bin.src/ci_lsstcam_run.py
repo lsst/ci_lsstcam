@@ -131,6 +131,21 @@ class HipsGenerateCommand(BaseCommand):
         subprocess.run(pipetask, check=True)
 
 
+@ciRunner.register("update-dimension-regions", index_command := index_command + 1)
+class UpdateDimensionRegionsCommand(BaseCommand):
+    def run(self, currentState: BuildState):
+        args = (
+            "--long-log",
+            "--log-level", "VERBOSE",
+            "update-dimension-regions",
+            self.runner.RunDir,
+            "LSSTCam",
+            COLLECTION,
+        )
+        cmd = self.runner.getExecutableCmd("DAF_BUTLER_DIR", "butler", args)
+        subprocess.run(cmd, check=True)
+
+
 ciRunner.register("test", index_command := index_command + 1)(TestRunner)
 
 ciRunner.run()
