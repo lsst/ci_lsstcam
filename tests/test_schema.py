@@ -141,6 +141,11 @@ class TestSchemaMatch(lsst.utils.tests.TestCase):
         dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
         self._validateSchema("dia_source", dataId, "DiaSource", isDataFrame=True)
 
+    def testShearObjectSchemaMatch(self):
+        """Check ShearObject table"""
+        dataId = {"instrument": "LSSTCam", "tract": 10563, "skymap": self.skymap}
+        self._validateSchema("object_shear_all", dataId, "ShearObject")
+
 
 if __name__ == "__main__":
     lsst.utils.tests.init()
