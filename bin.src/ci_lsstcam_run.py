@@ -15,7 +15,7 @@ PRETRAINED_MODELS_DIR = os.getenv(
 )
 INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qgraph"
-INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_comcam_2025-02-18,skymaps"
+INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_lsstcam_2026-02-13,skymaps"
 COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam"
 HIPS_COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam_hips"
 SKYMAP = 'lsst_cells_v1'
