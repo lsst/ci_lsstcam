@@ -3,9 +3,15 @@ import os
 import subprocess
 
 from lsst.ci.builder import CommandRunner, BuildState, BaseCommand
-from lsst.ci.builder.commands import (CreateButler, RegisterInstrument, WriteCuratedCalibrations,
-                                      RegisterSkyMap, DefineVisits, ButlerImport,
-                                      TestRunner)
+from lsst.ci.builder.commands import (
+    CreateButler,
+    RegisterInstrument,
+    WriteCuratedCalibrations,
+    RegisterSkyMap,
+    DefineVisits,
+    ButlerImport,
+    TestRunner,
+)
 
 TESTDATA_DIR = os.getenv(
     "LSSTCAM_TESTDATA_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_lsstcam_m49"
@@ -17,8 +23,7 @@ INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qgraph"
 INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_lsstcam_2026-02-13,skymaps"
 COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam"
-HIPS_COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam_hips"
-SKYMAP = 'lsst_cells_v1'
+SKYMAP = "lsst_cells_v1"
 
 index_command = 0
 
@@ -67,12 +72,21 @@ class LSSTCamButlerImportPretrainedModels(ButlerImport):
 class QgraphCommand(BaseCommand):
     @classmethod
     def addArgs(cls, parser: ArgumentParser):
-        parser.add_argument("--config-no-limit-deblend", dest="no_limit_deblend", action="store_true",
-                            help="Whether to disable useCiLimits for deblending and process all blends")
-        parser.add_argument("--config-process-singles", dest="process_singles", action="store_true",
-                            help="Whether to enable processSingles (isolated objects) for deblending")
+        parser.add_argument(
+            "--config-no-limit-deblend",
+            dest="no_limit_deblend",
+            action="store_true",
+            help="Whether to disable useCiLimits for deblending and process all blends",
+        )
+        parser.add_argument(
+            "--config-process-singles",
+            dest="process_singles",
+            action="store_true",
+            help="Whether to enable processSingles (isolated objects) for deblending",
+        )
 
     def run(self, currentState: BuildState):
+        hipsDir = os.path.join(self.runner.RunDir, "hips")
         args = (
             "--long-log",
             "qgraph",
@@ -88,6 +102,7 @@ class QgraphCommand(BaseCommand):
             f"deblendCoaddFootprints:multibandDeblend.processSingles={self.arguments.process_singles}",
             "--config",
             f"deblendCoaddFootprints:multibandDeblend.useCiLimits={not self.arguments.no_limit_deblend}",
+            "--config", "parameters:base_uri=" + hipsDir,
         )
         pipetask = self.runner.getExecutableCmd("CTRL_MPEXEC_DIR", "pipetask", args)
         subprocess.run(pipetask, check=True)
@@ -99,33 +114,18 @@ class ProcessingCommand(BaseCommand):
         args = (
             "--long-log",
             "run",
-            "-j", str(self.arguments.num_cores),
-            "-b", self.runner.RunDir,
-            "--input", INPUTCOL,
-            "--output", COLLECTION,
+            "-j",
+            str(self.arguments.num_cores),
+            "-b",
+            self.runner.RunDir,
+            "--input",
+            INPUTCOL,
+            "--output",
+            COLLECTION,
             "--register-dataset-types",
             "--skip-existing",
-            "--qgraph", os.path.join(self.runner.RunDir, QGRAPH_FILE),
-        )
-        pipetask = self.runner.getExecutableCmd("CTRL_MPEXEC_DIR", "pipetask", args)
-        subprocess.run(pipetask, check=True)
-
-
-@ciRunner.register("hips", index_command := index_command + 1)
-class HipsGenerateCommand(BaseCommand):
-    def run(self, currentState: BuildState):
-        hipsDir = os.path.join(self.runner.RunDir, "hips")
-        args = (
-            "--long-log",
-            "run",
-            "-j", str(self.arguments.num_cores),
-            "-b", self.runner.RunDir,
-            "-i", COLLECTION,
-            "--output", HIPS_COLLECTION,
-            "-p", "$CI_LSSTCAM_DIR/resources/hips.yaml",
-            "-c", "generateHips:hips_base_uri="+hipsDir,
-            "-c", "generateColorHips:hips_base_uri="+hipsDir,
-            "--register-dataset-types"
+            "--qgraph",
+            os.path.join(self.runner.RunDir, QGRAPH_FILE),
         )
         pipetask = self.runner.getExecutableCmd("CTRL_MPEXEC_DIR", "pipetask", args)
         subprocess.run(pipetask, check=True)
@@ -136,7 +136,8 @@ class UpdateDimensionRegionsCommand(BaseCommand):
     def run(self, currentState: BuildState):
         args = (
             "--long-log",
-            "--log-level", "VERBOSE",
+            "--log-level",
+            "VERBOSE",
             "update-dimension-regions",
             self.runner.RunDir,
             "LSSTCam",
