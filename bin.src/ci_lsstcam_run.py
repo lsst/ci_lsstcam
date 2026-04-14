@@ -20,7 +20,7 @@ PRETRAINED_MODELS_DIR = os.getenv(
     "TESTDATA_CI_IMSIM_DIR", "/sdf/group/rubin/shared/data/test_data/testdata_ci_imsim"
 )
 INSTRUMENT_NAME = "LSSTCam"
-QGRAPH_FILE = "DRP.qgraph"
+QGRAPH_FILE = "DRP.qg"
 INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_lsstcam_2026-02-13,skymaps"
 COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam"
 SKYMAP = "lsst_cells_v1"
