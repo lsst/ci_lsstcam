@@ -35,32 +35,27 @@ class TestHipsOutputs(unittest.TestCase):
     def setUp(self):
         self.butler = Butler(os.path.join(getPackageDir("ci_lsstcam"), "DATA"),
                              instrument="LSSTCam", skymap="lsst_cells_v1",
-                             writeable=False, collections=["LSSTCam/runs/ci_lsstcam_hips"])
+                             writeable=False, collections=["LSSTCam/runs/ci_lsstcam"])
         self._bands = ['u', 'g', 'r', 'i']
         self.hips_uri_base = ResourcePath(os.path.join(getPackageDir("ci_lsstcam"), "DATA", "hips"))
 
     def test_hips_exist(self):
         """Test that the HIPS images exist and are readable."""
         for band in self._bands:
-            datasets = set(self.butler.registry.queryDatasets("deepCoadd_hpx", band=band))
+            datasets = set(self.butler.registry.queryDatasets(f"deep_coadd_{band}_hips8"))
 
-            # There are 90 HiPS images for each band.
-            self.assertEqual(len(datasets), 60)
+            # There are 4 HiPS images for each band.
+            self.assertEqual(len(datasets), 4)
 
             stored = self.butler.stored_many(datasets)
             for dataset in datasets:
-                self.assertTrue(stored[dataset], msg="File exists for deepCoadd_hpx")
-
-            exp = self.butler.get(list(datasets)[0])
-
-            self.assertEqual(exp.wcs.getFitsMetadata()["CTYPE1"], "RA---HPX")
-            self.assertEqual(exp.wcs.getFitsMetadata()["CTYPE2"], "DEC--HPX")
+                self.assertTrue(stored[dataset], msg=f"File exists for deep_coadd_{band}_hips8")
 
     def test_hips_trees_exist(self):
         """Test that the HiPS tree exists and has correct files."""
         for band in self._bands:
-            self._check_hips_tree(self.hips_uri_base.join(f"band_{band}", forceDirectory=True))
-        self._check_hips_tree(self.hips_uri_base.join("color_gri", forceDirectory=True), check_fits=False)
+            self._check_hips_tree(self.hips_uri_base.join(f"color_{band}", forceDirectory=True),
+                                  check_fits=False)
 
     def _check_hips_tree(self, hips_uri, check_fits=True):
         """Check a HiPS tree for files.
