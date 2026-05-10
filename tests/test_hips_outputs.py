@@ -34,7 +34,7 @@ class TestHipsOutputs(unittest.TestCase):
     """Check that HIPS outputs are as expected."""
     def setUp(self):
         self.butler = Butler(os.path.join(getPackageDir("ci_lsstcam"), "DATA"),
-                             instrument="LSSTCam", skymap="lsst_cells_v1",
+                             instrument="LSSTCam", skymap="lsst_cells_v2",
                              writeable=False, collections=["LSSTCam/runs/ci_lsstcam"])
         self._bands = ['u', 'g', 'r', 'i']
         self.hips_uri_base = ResourcePath(os.path.join(getPackageDir("ci_lsstcam"), "DATA", "hips"))
