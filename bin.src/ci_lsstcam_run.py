@@ -23,7 +23,7 @@ INSTRUMENT_NAME = "LSSTCam"
 QGRAPH_FILE = "DRP.qg"
 INPUTCOL = "LSSTCam/ci_m49,pretrained_models/tac_cnn_lsstcam_2026-02-13,skymaps"
 COLLECTION = f"{INSTRUMENT_NAME}/runs/ci_lsstcam"
-SKYMAP = "lsst_cells_v1"
+SKYMAP = "lsst_cells_v2"
 
 index_command = 0
 
