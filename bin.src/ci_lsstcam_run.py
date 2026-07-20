@@ -94,7 +94,7 @@ class QgraphCommand(BaseCommand):
             "-b", self.runner.RunDir,
             "--input", INPUTCOL,
             "--output", COLLECTION,
-            "-p", "$DRP_PIPE_DIR/pipelines/LSSTCam/DRP-ci_lsstcam.yaml",
+            "-p", "$DRP_PIPE_DIR/pipelines/LSSTCam/DRP-ci_lsstcam-future.yaml",
             "--skip-existing",
             "--save-qgraph", os.path.join(self.runner.RunDir, QGRAPH_FILE),
             "--config", f"reprocessVisitImage:deblend.useCiLimits={not self.arguments.no_limit_deblend}",
